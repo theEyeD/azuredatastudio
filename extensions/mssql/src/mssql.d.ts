@@ -548,3 +548,9 @@ export interface SqlMigrationAssessmentResult extends azdata.ResultStatus {
 export interface ISqlMigrationService {
 	getAssessments(ownerUri: string): Promise<SqlMigrationAssessmentResult | undefined>;
 }
+
+// Secret Store Service
+
+export interface ISecretStoreService {
+
+}

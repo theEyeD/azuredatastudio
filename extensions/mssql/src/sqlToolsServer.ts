@@ -12,7 +12,7 @@ import { getCommonLaunchArgsAndCleanupOldLogFiles } from './utils';
 import { Telemetry, LanguageClientErrorHandler } from './telemetry';
 import { SqlOpsDataClient, ClientOptions } from 'dataprotocol-client';
 import { TelemetryFeature, AgentServicesFeature, SerializationFeature, AccountFeature, SqlAssessmentServicesFeature, ProfilerFeature } from './features';
-import { CredentialStore } from './credentialstore/credentialstore';
+import { CredentialStore, SecretStoreService } from './credentialstore/credentialstore';
 import { AzureResourceProvider } from './resourceProvider/resourceProvider';
 import { SchemaCompareService } from './schemaCompare/schemaCompareService';
 import { AppContext } from './appContext';
@@ -143,6 +143,24 @@ function generateHandleServerProviderEvent() {
 }
 
 function getClientOptions(context: AppContext): ClientOptions {
+	const features = [
+		// we only want to add new features
+		...SqlOpsDataClient.defaultFeatures,
+		TelemetryFeature,
+		AccountFeature,
+		AgentServicesFeature,
+		SerializationFeature,
+		SqlAssessmentServicesFeature,
+		SchemaCompareService.asFeature(context),
+		LanguageExtensionService.asFeature(context),
+		DacFxService.asFeature(context),
+		CmsService.asFeature(context),
+		SqlAssessmentService.asFeature(context),
+		NotebookConvertService.asFeature(context),
+		ProfilerFeature,
+		SqlMigrationService.asFeature(context),
+	];
+	features.push(SecretStoreService.asFeature(context));
 	return {
 		documentSelector: ['sql'],
 		synchronize: {
@@ -150,23 +168,7 @@ function getClientOptions(context: AppContext): ClientOptions {
 		},
 		providerId: Constants.providerId,
 		errorHandler: new LanguageClientErrorHandler(),
-		features: [
-			// we only want to add new features
-			...SqlOpsDataClient.defaultFeatures,
-			TelemetryFeature,
-			AccountFeature,
-			AgentServicesFeature,
-			SerializationFeature,
-			SqlAssessmentServicesFeature,
-			SchemaCompareService.asFeature(context),
-			LanguageExtensionService.asFeature(context),
-			DacFxService.asFeature(context),
-			CmsService.asFeature(context),
-			SqlAssessmentService.asFeature(context),
-			NotebookConvertService.asFeature(context),
-			ProfilerFeature,
-			SqlMigrationService.asFeature(context),
-		],
+		features: features,
 		outputChannel: new CustomOutputChannel()
 	};
 }
