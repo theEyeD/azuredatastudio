@@ -12,10 +12,6 @@ steps:
     inputs:
       versionSpec: "12.18.3"
 
-  - task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
-    inputs:
-      versionSpec: "1.x"
-
   - script: |
       mkdir -p .build
       node build/azure-pipelines/common/computeNodeModulesCacheKey.js > .build/yarnlockhash

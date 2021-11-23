@@ -3,10 +3,6 @@ steps:
   inputs:
     versionSpec: "12.13.0"
 
-- task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
-  inputs:
-    versionSpec: "1.x"
-
 - powershell: |
     . build/azure-pipelines/win32/exec.ps1
     $ErrorActionPreference = "Stop"
