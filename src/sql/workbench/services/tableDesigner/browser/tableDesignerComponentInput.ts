@@ -11,6 +11,9 @@ import { designers } from 'sql/workbench/api/common/sqlExtHostTypes';
 import { Emitter, Event } from 'vs/base/common/event';
 import { INotificationService, Severity } from 'vs/platform/notification/common/notification';
 import { deepClone, equals } from 'vs/base/common/objects';
+import { IConnectionManagementService } from 'sql/platform/connection/common/connectionManagement';
+import { IAdsTelemetryService, ITelemetryEvent } from 'sql/platform/telemetry/common/telemetry';
+import { TelemetryAction, TelemetryView } from 'sql/platform/telemetry/common/telemetryKeys';
 
 export class TableDesignerComponentInput implements DesignerComponentInput {
 
@@ -28,10 +31,14 @@ export class TableDesignerComponentInput implements DesignerComponentInput {
 	public readonly onEditProcessed: Event<DesignerEditProcessedEventArgs> = this._onEditProcessed.event;
 	public readonly onStateChange: Event<DesignerStateChangedEventArgs> = this._onStateChange.event;
 
-	constructor(private readonly _provider: TableDesignerProvider,
+	constructor(
+		private readonly _provider: TableDesignerProvider,
 		private _tableInfo: azdata.designers.TableInfo,
-		@INotificationService private readonly _notificationService: INotificationService) {
-	}
+		private _serverInfo: azdata.ServerInfo,
+		@INotificationService private readonly _notificationService: INotificationService,
+		@IConnectionManagementService readonly _connectionManagementService: IConnectionManagementService,
+		@IAdsTelemetryService readonly _adsTelemetryService: IAdsTelemetryService
+	) { }
 
 	get valid(): boolean {
 		return this._valid;
@@ -58,6 +65,8 @@ export class TableDesignerComponentInput implements DesignerComponentInput {
 	}
 
 	processEdit(edit: DesignerEdit): void {
+		const editEvent = this.createEditActionEvent(edit);
+		const startTime = new Date().getTime();
 		this.updateState(this.valid, this.dirty, 'processEdit');
 		this._provider.processTableEdit(this._tableInfo, this._viewModel!, edit).then(
 			result => {
@@ -71,10 +80,18 @@ export class TableDesignerComponentInput implements DesignerComponentInput {
 						errors: result.errors
 					}
 				});
+				editEvent.withAdditionalMeasurements({
+					'elapsedTime': new Date().getTime() - startTime
+				}).send();
 			},
 			error => {
 				this._notificationService.error(localize('tableDesigner.errorProcessingEdit', "An error occured while processing the change: {0}", error?.message ?? error));
 				this.updateState(this.valid, this.dirty);
+				this._adsTelemetryService.createErrorEvent(TelemetryView.TableDesigner, edit.type, error?.code, error?.message).withAdditionalProperties({
+					objectType: edit.path[0],
+					provider: this._provider.providerId,
+					isNewTable: this._tableInfo.isNewTable
+				}).withServerInfo(this._serverInfo).send();
 			}
 		);
 	}
@@ -84,16 +101,29 @@ export class TableDesignerComponentInput implements DesignerComponentInput {
 			severity: Severity.Info,
 			message: localize('tableDesigner.savingChanges', "Saving table designer changes...")
 		});
+		const saveEvent = this._adsTelemetryService.createActionEvent(TelemetryView.TableDesigner, TelemetryAction.SaveTableDesigner).withAdditionalProperties({
+			provider: this._provider.providerId,
+			isNewTable: this._tableInfo.isNewTable,
+		}).withServerInfo(this._serverInfo);
+		const startTime = new Date().getTime();
 		try {
 			this.updateState(this.valid, this.dirty, 'save');
 			await this._provider.saveTable(this._tableInfo, this._viewModel);
 			this._originalViewModel = this._viewModel;
 			this.updateState(true, false);
 			notificationHandle.updateMessage(localize('tableDesigner.savedChangeSuccess', "The changes have been successfully saved."));
+			saveEvent.withAdditionalMeasurements({
+				'elapsedTime': new Date().getTime() - startTime
+			}).send();
 		} catch (error) {
 			notificationHandle.updateSeverity(Severity.Error);
 			notificationHandle.updateMessage(localize('tableDesigner.saveChangeError', "An error occured while saving changes: {0}", error?.message ?? error));
 			this.updateState(this.valid, this.dirty);
+			this._adsTelemetryService.createErrorEvent(TelemetryView.TableDesigner, TelemetryAction.SaveTableDesigner,
+				error?.code, error?.message).withAdditionalProperties({
+					provider: this._provider.providerId,
+					isNewTable: this._tableInfo.isNewTable,
+				}).withServerInfo(this._serverInfo).send();
 		}
 	}
 
@@ -473,5 +503,14 @@ export class TableDesignerComponentInput implements DesignerComponentInput {
 		if (allProperties.indexOf(property) === -1) {
 			this._viewModel[property] = {};
 		}
+	}
+
+	private createEditActionEvent(edit: DesignerEdit): ITelemetryEvent {
+		const editAction = this._adsTelemetryService.createActionEvent(TelemetryView.TableDesigner, edit.type).withAdditionalProperties({
+			objectType: edit.path[0],
+			provider: this._provider.providerId,
+			isNewTable: this._tableInfo.isNewTable
+		}).withServerInfo(this._serverInfo);
+		return editAction;
 	}
 }

@@ -187,11 +187,10 @@ export interface DesignerTableComponentRowData {
 
 
 export enum DesignerEditType {
-	Add = 0,
-	Remove = 1,
-	Update = 2
+	Add = 'Add',
+	Remove = 'Remove',
+	Update = 'Update'
 }
-
 export interface DesignerEdit {
 	type: DesignerEditType;
 	path: DesignerEditPath;

@@ -16,7 +16,8 @@ export class TableDesignerService implements ITableDesignerService {
 
 	constructor(@IEditorService private _editorService: IEditorService,
 		@IInstantiationService private _instantiationService: IInstantiationService,
-		@IAdsTelemetryService private _adsTelemetryService: IAdsTelemetryService) { }
+		@IAdsTelemetryService private _adsTelemetryService: IAdsTelemetryService
+	) { }
 
 	public _serviceBrand: undefined;
 	private _providers = new Map<string, TableDesignerProvider>();
@@ -43,13 +44,13 @@ export class TableDesignerService implements ITableDesignerService {
 		throw invalidProvider(providerId);
 	}
 
-	public async openTableDesigner(providerId: string, tableInfo: azdata.designers.TableInfo): Promise<void> {
+	public async openTableDesigner(providerId: string, tableInfo: azdata.designers.TableInfo, serverInfo?: azdata.ServerInfo): Promise<void> {
 		this._adsTelemetryService.createActionEvent(TelemetryView.TableDesigner, TelemetryAction.Open).withAdditionalProperties({
 			provider: providerId,
 			newTable: tableInfo.isNewTable
-		}).send();
+		}).withServerInfo(serverInfo).send();
 		const provider = this.getProvider(providerId);
-		const tableDesignerInput = this._instantiationService.createInstance(TableDesignerInput, provider, tableInfo);
+		const tableDesignerInput = this._instantiationService.createInstance(TableDesignerInput, provider, tableInfo, serverInfo);
 		await this._editorService.openEditor(tableDesignerInput, { pinned: true }, ACTIVE_GROUP);
 	}
 }

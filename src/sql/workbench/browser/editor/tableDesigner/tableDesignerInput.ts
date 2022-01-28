@@ -26,10 +26,12 @@ export class TableDesignerInput extends EditorInput {
 	constructor(
 		private _provider: TableDesignerProvider,
 		private _tableInfo: azdata.designers.TableInfo,
+		private _serverInfo: azdata.ServerInfo,
 		@IInstantiationService private readonly _instantiationService: IInstantiationService,
-		@IEditorService editorService: IEditorService) {
+		@IEditorService editorService: IEditorService
+	) {
 		super();
-		this._designerComponentInput = this._instantiationService.createInstance(TableDesignerComponentInput, this._provider, this._tableInfo);
+		this._designerComponentInput = this._instantiationService.createInstance(TableDesignerComponentInput, this._provider, this._tableInfo, this._serverInfo);
 		this._register(this._designerComponentInput.onStateChange((e) => {
 			if (e.currentState.dirty !== e.previousState.dirty) {
 				this._onDidChangeDirty.fire();
