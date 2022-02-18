@@ -88,7 +88,7 @@ export abstract class AbstractTelemetryOptOut implements IWorkbenchContribution 
 		const yesLabelKey = 'telemetryOptOut.OptIn';
 		const noLabelKey = 'telemetryOptOut.OptOut';
 
-		let promptMessage = localize('telemetryOptOut.optOutOption', "Please help Microsoft improve Visual Studio Code by allowing the collection of usage data. Read our [privacy statement]({0}) for more details.", this.privacyUrl);
+		let promptMessage = localize('telemetryOptOut.optOutOption', "Please help Microsoft improve Azure Data Studio by allowing the collection of usage data. Read our [privacy statement]({0}) for more details.", this.privacyUrl);
 		let yesLabel = localize('telemetryOptOut.OptIn', "Yes, glad to help");
 		let noLabel = localize('telemetryOptOut.OptOut', "No, thanks");
 
@@ -107,7 +107,7 @@ export abstract class AbstractTelemetryOptOut implements IWorkbenchContribution 
 					.then(translation => {
 						const translationsFromPack: any = translation && translation.contents ? translation.contents['vs/workbench/contrib/welcome/telemetryOptOut/electron-browser/telemetryOptOut'] : {};
 						if (!!translationsFromPack[promptMessageKey] && !!translationsFromPack[yesLabelKey] && !!translationsFromPack[noLabelKey]) {
-							promptMessage = translationsFromPack[promptMessageKey].replace('{0}', this.privacyUrl) + ' (Please help Microsoft improve Visual Studio Code by allowing the collection of usage data.)';
+							promptMessage = translationsFromPack[promptMessageKey].replace('{0}', this.privacyUrl) + ' (Please help Microsoft improve Azure Data Studio by allowing the collection of usage data.)';
 							yesLabel = translationsFromPack[yesLabelKey] + ' (Yes)';
 							noLabel = translationsFromPack[noLabelKey] + ' (No)';
 						}
