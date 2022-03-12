@@ -33,7 +33,7 @@ export class TestQueryModelService implements IQueryModelService {
 	runQuery(uri: string, range: IRange, runOptions?: azdata.ExecutionPlanOptions): void {
 		throw new Error('Method not implemented.');
 	}
-	runQueryStatement(uri: string, range: IRange): void {
+	runQueryStatement(uri: string, range: IRange, runOptions?: azdata.ExecutionPlanOptions): void {
 		throw new Error('Method not implemented.');
 	}
 	runQueryString(uri: string, selection: string) {

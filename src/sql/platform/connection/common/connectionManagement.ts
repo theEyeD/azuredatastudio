@@ -330,7 +330,8 @@ export enum RunQueryOnConnectionMode {
 	executeQuery = 1,
 	executeCurrentQuery = 2,
 	estimatedQueryPlan = 3,
-	actualQueryPlan = 4
+	actualQueryPlan = 4,
+	actualCurrentQueryPlan = 5
 }
 
 export interface INewConnectionParams {

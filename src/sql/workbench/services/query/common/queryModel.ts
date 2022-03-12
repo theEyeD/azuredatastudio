@@ -62,7 +62,7 @@ export interface IQueryModelService {
 
 	getQueryRows(uri: string, rowStart: number, numberOfRows: number, batchId: number, resultId: number): Promise<ResultSetSubset | undefined>;
 	runQuery(uri: string, range: IRange | undefined, runOptions?: ExecutionPlanOptions): void;
-	runQueryStatement(uri: string, range: IRange | undefined): void;
+	runQueryStatement(uri: string, range: IRange | undefined, runOptions?: ExecutionPlanOptions): void;
 	runQueryString(uri: string, selection: string | undefined): void;
 	cancelQuery(input: QueryRunner | string): void;
 	disposeQuery(uri: string): void;

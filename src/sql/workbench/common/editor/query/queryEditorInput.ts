@@ -258,8 +258,8 @@ export abstract class QueryEditorInput extends EditorInput implements IConnectab
 		this.state.executing = true;
 	}
 
-	public runQueryStatement(range?: IRange): void {
-		this.queryModelService.runQueryStatement(this.uri, range);
+	public runQueryStatement(range?: IRange, executePlanOptions?: ExecutionPlanOptions): void {
+		this.queryModelService.runQueryStatement(this.uri, range, executePlanOptions);
 		this.state.executing = true;
 	}
 
@@ -302,6 +302,8 @@ export abstract class QueryEditorInput extends EditorInput implements IConnectab
 				this.runQuery(range, { displayEstimatedQueryPlan: true });
 			} else if (params.runQueryOnCompletion === RunQueryOnConnectionMode.actualQueryPlan) {
 				this.runQuery(range, { displayActualQueryPlan: true });
+			} else if (params.runQueryOnCompletion === RunQueryOnConnectionMode.actualCurrentQueryPlan) {
+				this.runQueryStatement(range, { displayActualQueryPlan: true });
 			}
 		}
 		this._onDidChangeLabel.fire();

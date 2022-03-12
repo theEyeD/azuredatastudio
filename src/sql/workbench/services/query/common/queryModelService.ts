@@ -197,8 +197,8 @@ export class QueryModelService implements IQueryModelService {
 	/**
 	 * Run the current SQL statement for the given URI
 	 */
-	public async runQueryStatement(uri: string, range: IRange): Promise<void> {
-		return this.doRunQuery(uri, range, true);
+	public async runQueryStatement(uri: string, range: IRange, runOptions?: azdata.ExecutionPlanOptions): Promise<void> {
+		return this.doRunQuery(uri, range, true, runOptions);
 	}
 
 	/**
